@@ -2,27 +2,45 @@
 const users = JSON.parse(localStorage.getItem('users')) || [];
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 
+document.addEventListener('DOMContentLoaded', checkRememberedCredentials);
+
 function register() {
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const role = document.getElementById('role').value;
+    const role = document.getElementById('role') ? document.getElementById('role').value : 'user';
+
+    if(!email || !password) {
+        alert("Please fill in all fields");
+        return;
+    }
 
     const user = { name, email, password, role };
     users.push(user);
     localStorage.setItem('users', JSON.stringify(users));
     alert('Registration successful. Please login.');
-    window.location.href = 'index.html';
 }
 
 function login() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const rememberMeCheckbox = document.getElementById("remember-me"); 
 
     const user = users.find(u => u.email === email && u.password === password);
+
     if (user) {
         currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
+
+        if (rememberMeCheckbox && rememberMeCheckbox.checked) {
+            localStorage.setItem("rememberedEmail", email);
+            localStorage.setItem("rememberedPassword", password);
+        } else {
+            localStorage.removeItem("rememberedEmail");
+            localStorage.removeItem("rememberedPassword");
+        }
+
+        alert(`Welcome, ${user.name}!`);
         window.location.href = 'dashboard.html';
     } else {
         alert('Invalid email or password');
@@ -33,6 +51,28 @@ function logout() {
     currentUser = null;
     localStorage.removeItem('currentUser');
     window.location.href = 'index.html';
+}
+
+// Nova função para preencher os campos automaticamente
+function checkRememberedCredentials() {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    const rememberedPassword = localStorage.getItem("rememberedPassword");
+
+    if (rememberedEmail && rememberedPassword) {
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const rememberMeCheckbox = document.getElementById("remember-me");
+
+        if (emailInput) { 
+            emailInput.value = rememberedEmail;
+        }
+        if (passwordInput) {
+             passwordInput.value = rememberedPassword;
+        }
+        if (rememberMeCheckbox) {
+            rememberMeCheckbox.checked = true;
+        }
+    }
 }
 
 // Product management
